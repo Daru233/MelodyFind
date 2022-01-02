@@ -3,15 +3,16 @@ import CONSTANTS
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from random import randint
+from flask_cors import CORS
 
 CLIENT_ID = CONSTANTS.Client_ID
 CLIENT_SECRET = CONSTANTS.Client_Secret
 REDIRECT_URL = CONSTANTS.Redirect_URL
 app = Flask(__name__)
+CORS(app)
 
-
-@app.route("/")
-def test():
+@app.route("/mf/v1/song", methods=["GET"])
+def getARandomSong():
     response = []
     categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop', 'pop']
     playlists = []
