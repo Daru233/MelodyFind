@@ -1,6 +1,7 @@
 env
 CONSTANTS.py
 .flask_session
+.spotify_caches
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
