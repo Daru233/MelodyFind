@@ -96,79 +96,79 @@ def session_cache_path():
 #     return spotify.current_user()
 #
 #
-# @app.route("/mf/v1/song", methods=["GET"])
-# def getARandomSong():
-#
-#     if not request.args:
-#
-#         response = []
-#         categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
-#                       'pop']
-#         playlists = []
-#         tracks_in_playlist = []
-#
-#         sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID,
-#                                                                    client_secret=CLIENT_SECRET))
-#         random_category_id = categories[randint(0, 9)]
-#
-#         category_playlists_results = sp.category_playlists(category_id=random_category_id, country='gb')
-#
-#         for item in category_playlists_results['playlists']['items']:
-#             playlists.append(item)
-#
-#         random_playlist = playlists[0]
-#
-#         FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
-#                  'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
-#                  'total'
-#
-#         playlist_items_result = sp.playlist_items(
-#             playlist_id=random_playlist['id'],
-#             fields=FIELDS,
-#             additional_types=['track'])
-#
-#         for item in playlist_items_result['items']:
-#             tracks_in_playlist.append(item)
-#
-#         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
-#         response.append(playlist_items_result)
-#
-#         return jsonify(track_to_return, 200)
-#
-#     else:
-#
-#         response = []
-#         playlists = []
-#         tracks_in_playlist = []
-#
-#         category = request.args['category']
-#
-#         sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID,
-#                                                                    client_secret=CLIENT_SECRET))
-#
-#         category_playlists_results = sp.category_playlists(category_id=category, country='gb')
-#
-#         for item in category_playlists_results['playlists']['items']:
-#             playlists.append(item)
-#
-#         playlist_chosen = playlists[0]
-#
-#         FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
-#                  'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
-#                  'total'
-#
-#         playlist_items_result = sp.playlist_items(
-#             playlist_id=playlist_chosen['id'],
-#             fields=FIELDS,
-#             additional_types=['track'])
-#
-#         for item in playlist_items_result['items']:
-#             tracks_in_playlist.append(item)
-#
-#         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
-#         response.append(playlist_items_result)
-#
-#         return jsonify(track_to_return, 200)
+@app.route("/mf/v1/song", methods=["GET"])
+def getARandomSong():
+
+    if not request.args:
+
+        response = []
+        categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
+                      'pop']
+        playlists = []
+        tracks_in_playlist = []
+
+        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID,
+                                                                   client_secret=CLIENT_SECRET))
+        random_category_id = categories[randint(0, 9)]
+
+        category_playlists_results = sp.category_playlists(category_id=random_category_id, country='gb')
+
+        for item in category_playlists_results['playlists']['items']:
+            playlists.append(item)
+
+        random_playlist = playlists[0]
+
+        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+                 'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
+                 'total'
+
+        playlist_items_result = sp.playlist_items(
+            playlist_id=random_playlist['id'],
+            fields=FIELDS,
+            additional_types=['track'])
+
+        for item in playlist_items_result['items']:
+            tracks_in_playlist.append(item)
+
+        track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
+        response.append(playlist_items_result)
+
+        return jsonify(track_to_return, 200)
+
+    else:
+
+        response = []
+        playlists = []
+        tracks_in_playlist = []
+
+        category = request.args['category']
+
+        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID,
+                                                                   client_secret=CLIENT_SECRET))
+
+        category_playlists_results = sp.category_playlists(category_id=category, country='gb')
+
+        for item in category_playlists_results['playlists']['items']:
+            playlists.append(item)
+
+        playlist_chosen = playlists[0]
+
+        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+                 'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
+                 'total'
+
+        playlist_items_result = sp.playlist_items(
+            playlist_id=playlist_chosen['id'],
+            fields=FIELDS,
+            additional_types=['track'])
+
+        for item in playlist_items_result['items']:
+            tracks_in_playlist.append(item)
+
+        track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
+        response.append(playlist_items_result)
+
+        return jsonify(track_to_return, 200)
 
 
 @app.route("/", methods=["GET"])
