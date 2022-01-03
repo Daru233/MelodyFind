@@ -35,13 +35,18 @@ def callback():
         # Step 1. Visitor is unknown, give random ID
         session['uuid'] = str(uuid.uuid4())
 
+    old_SCOPES = 'user-read-currently-playing playlist-modify-private'
+    SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read user-library-modify'
+
     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
     auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,
                                                client_secret=CLIENT_SECRET,
                                                redirect_uri=REDIRECT_URL,
-                                               scope='user-read-currently-playing playlist-modify-private',
+                                               scope=SCOPES,
                                                cache_handler=cache_handler,
                                                show_dialog=True)
+
+    print(auth_manager.get_cached_token())
 
     if request.args.get("code"):
         # Step 3. Being redirected from Spotify auth page
@@ -110,9 +115,13 @@ def getARandomSong():
 
         random_playlist = playlists[0]
 
+        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+                 'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
+                 'total'
+
         playlist_items_result = sp.playlist_items(
             playlist_id=random_playlist['id'],
-            fields='items.track.id, items.track.name, items.track.href, items.track.uri, total',
+            fields=FIELDS,
             additional_types=['track'])
 
         for item in playlist_items_result['items']:
@@ -141,9 +150,13 @@ def getARandomSong():
 
         playlist_chosen = playlists[0]
 
+        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+                 'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
+                 'total'
+
         playlist_items_result = sp.playlist_items(
             playlist_id=playlist_chosen['id'],
-            fields='items.track.id, items.track.name, items.track.href, items.track.uri, total',
+            fields=FIELDS,
             additional_types=['track'])
 
         for item in playlist_items_result['items']:
@@ -157,3 +170,4 @@ def getARandomSong():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    # app.run(ssl_context='adhoc')
