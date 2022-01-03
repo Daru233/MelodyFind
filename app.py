@@ -13,9 +13,9 @@ from flask_cors import CORS
 # REDIRECT_URL = CONSTANTS.Redirect_URL
 
 app = Flask(__name__)
-CLIENT_ID = os.environ.get['CLIENT_ID']
-CLIENT_SECRET = os.environ.get['CLIENT_SECRET']
-REDIRECT_URL = os.environ.get['REDIRECT_URL']
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
+REDIRECT_URL = os.environ.get('REDIRECT_URL')
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
