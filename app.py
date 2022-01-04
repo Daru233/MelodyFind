@@ -2,7 +2,7 @@ from flask import Flask, jsonify, session, request, redirect
 from flask_session import Session
 import uuid
 import os
-import CONSTANTS
+# import CONSTANTS
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from random import randint
