@@ -75,19 +75,19 @@ def sign_out():
     return redirect('/callback')
 
 
-# @app.route('/current_user')
-# def current_user():
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
-#                                                client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL)
-#
-#     if not auth_manager.validate_token(cache_handler.get_cached_token()):
-#         return redirect('/callback')
-#
-#     spotify = spotipy.Spotify(auth_manager=auth_manager)
-#     return spotify.current_user()
+@app.route('/current_user')
+def current_user():
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+                                               client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL)
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('/callback')
+
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return spotify.current_user()
 
 
 @app.route("/mf/v1/song", methods=["GET"])
