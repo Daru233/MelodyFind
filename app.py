@@ -64,15 +64,15 @@ def callback():
     return jsonify("Signed in successfully!", 200)
 
 
-# @app.route('/sign_out')
-# def sign_out():
-#     try:
-#         # Remove the CACHE file (.cache-test) so that a new user can authorize.
-#         os.remove(session_cache_path())
-#         session.clear()
-#     except OSError as e:
-#         print("Error: %s - %s." % (e.filename, e.strerror))
-#     return redirect('/callback')
+@app.route('/sign_out')
+def sign_out():
+    try:
+        # Remove the CACHE file (.cache-test) so that a new user can authorize.
+        os.remove(session_cache_path())
+        session.clear()
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
+    return redirect('/callback')
 
 
 # @app.route('/current_user')
