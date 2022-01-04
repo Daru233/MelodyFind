@@ -57,7 +57,7 @@ def callback():
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         # Step 2. Display sign in link when no token
         auth_url = auth_manager.get_authorize_url()
-        return jsonify(auth_url)
+        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
 
     # Step 4. Signed in, display data
     spotify = spotipy.Spotify(auth_manager=auth_manager)
@@ -169,15 +169,15 @@ def helloheroku():
     return jsonify({"hello": "world"}, 200)
 
 
-# @app.route("/mf/v1/refresh", methods=["GET"])
-# def refresh():
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
-#                                                client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL)
-#
-#     return jsonify(auth_manager.get_cached_token())
+@app.route("/mf/v1/refresh", methods=["GET"])
+def refresh():
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+                                               client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL)
+
+    return jsonify(auth_manager.get_cached_token())
 
 
 if __name__ == "__main__":
