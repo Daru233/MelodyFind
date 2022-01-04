@@ -2,7 +2,7 @@ from flask import Flask, jsonify, session, request, redirect
 from flask_session import Session
 import uuid
 import os
-# import CONSTANTS
+import CONSTANTS
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from random import randint
@@ -15,7 +15,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CLIENT_ID = os.environ.get('Client_ID')
 CLIENT_SECRET = os.environ.get('Client_Secret')
-REDIRECT_URL = os.environ.get('Redirect_URL')
+REDIRECT_URL = os.environ.get('Heroku_URL')
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
@@ -31,74 +31,75 @@ def session_cache_path():
     return caches_folder + session.get('uuid')
 
 
-# @app.route('/callback', methods=['GET'])
-# def callback():
-#
-#     if not session.get('uuid'):
-#         # Step 1. Visitor is unknown, give random ID
-#         session['uuid'] = str(uuid.uuid4())
-#
-#     old_SCOPES = 'user-read-currently-playing playlist-modify-private'
-#     SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read user-library-modify'
-#
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL,
-#                                                scope=SCOPES,
-#                                                cache_handler=cache_handler,
-#                                                show_dialog=True)
-#
-#     print(auth_manager.get_cached_token())
-#
-#     if request.args.get("code"):
-#         # Step 3. Being redirected from Spotify auth page
-#         auth_manager.get_access_token(request.args.get("code"))
-#         # return redirect('/callback')
-#
-#     if not auth_manager.validate_token(cache_handler.get_cached_token()):
-#         # Step 2. Display sign in link when no token
-#         auth_url = auth_manager.get_authorize_url()
-#         return f'<h2><a href="{auth_url}">Sign in</a></h2>'
-#
-#     # Step 4. Signed in, display data
-#     spotify = spotipy.Spotify(auth_manager=auth_manager)
-#     # return f'<h2>Hi {spotify.me()["display_name"]}, ' \
-#     #        f'<small><a href="/sign_out">[sign out]<a/></small></h2>' \
-#     #        f'<a href="/playlists">my playlists</a> | ' \
-#     #        f'<a href="/currently_playing">currently playing</a> | ' \
-#     #        f'<a href="/current_user">me</a>' \
-#     return jsonify("Signed in successfully!", 200)
-#
-#
-# @app.route('/sign_out')
-# def sign_out():
-#     try:
-#         # Remove the CACHE file (.cache-test) so that a new user can authorize.
-#         os.remove(session_cache_path())
-#         session.clear()
-#     except OSError as e:
-#         print ("Error: %s - %s." % (e.filename, e.strerror))
-#     return redirect('/callback')
-#
-# @app.route('/current_user')
-# def current_user():
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
-#                                                client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL)
-#
-#     if not auth_manager.validate_token(cache_handler.get_cached_token()):
-#         return redirect('/callback')
-#
-#     spotify = spotipy.Spotify(auth_manager=auth_manager)
-#     return spotify.current_user()
+@app.route('/callback', methods=['GET'])
+def callback():
+    if not session.get('uuid'):
+        # Step 1. Visitor is unknown, give random ID
+        session['uuid'] = str(uuid.uuid4())
+
+    old_SCOPES = 'user-read-currently-playing playlist-modify-private'
+    SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read user-library-modify'
+
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL,
+                                               scope=SCOPES,
+                                               cache_handler=cache_handler,
+                                               show_dialog=True)
+
+    print(auth_manager.get_cached_token())
+
+    if request.args.get("code"):
+        # Step 3. Being redirected from Spotify auth page
+        auth_manager.get_access_token(request.args.get("code"))
+        # return redirect('/callback')
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        # Step 2. Display sign in link when no token
+        auth_url = auth_manager.get_authorize_url()
+        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+
+    # Step 4. Signed in, display data
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    # return f'<h2>Hi {spotify.me()["display_name"]}, ' \
+    #        f'<small><a href="/sign_out">[sign out]<a/></small></h2>' \
+    #        f'<a href="/playlists">my playlists</a> | ' \
+    #        f'<a href="/currently_playing">currently playing</a> | ' \
+    #        f'<a href="/current_user">me</a>' \
+    return jsonify("Signed in successfully!", 200)
+
+
+@app.route('/sign_out')
+def sign_out():
+    try:
+        # Remove the CACHE file (.cache-test) so that a new user can authorize.
+        os.remove(session_cache_path())
+        session.clear()
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
+    return redirect('/callback')
+
+
+@app.route('/current_user')
+def current_user():
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+                                               client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL)
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('/callback')
+
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return spotify.current_user()
+
+
 #
 #
 @app.route("/mf/v1/song", methods=["GET"])
 def getARandomSong():
-
     if not request.args:
 
         response = []
@@ -174,6 +175,17 @@ def getARandomSong():
 @app.route("/", methods=["GET"])
 def helloheroku():
     return jsonify({"hello": "world"}, 200)
+
+
+@app.route("/mf/v1/refresh", methods=["GET"])
+def refresh():
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+                                               client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL)
+
+    return jsonify(auth_manager.get_cached_token())
 
 
 if __name__ == "__main__":
