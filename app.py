@@ -30,38 +30,38 @@ def session_cache_path():
     return caches_folder + session.get('uuid')
 
 
-# @app.route('/callback', methods=['GET'])
-# def callback():
-#     if not session.get('uuid'):
-#         # Step 1. Visitor is unknown, give random ID
-#         session['uuid'] = str(uuid.uuid4())
-#
-#     old_SCOPES = 'user-read-currently-playing playlist-modify-private'
-#     SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read user-library-modify'
-#
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL,
-#                                                scope=SCOPES,
-#                                                cache_handler=cache_handler,
-#                                                show_dialog=True)
-#
-#     print(auth_manager.get_cached_token())
-#
-#     if request.args.get("code"):
-#         # Step 3. Being redirected from Spotify auth page
-#         auth_manager.get_access_token(request.args.get("code"))
-#         # return redirect('/callback')
-#
-#     if not auth_manager.validate_token(cache_handler.get_cached_token()):
-#         # Step 2. Display sign in link when no token
-#         auth_url = auth_manager.get_authorize_url()
-#         return f'<h2><a href="{auth_url}">Sign in</a></h2>'
-#
-#     # Step 4. Signed in, display data
-#     spotify = spotipy.Spotify(auth_manager=auth_manager)
-#     return jsonify("Signed in successfully!", 200)
+@app.route('/callback', methods=['GET'])
+def callback():
+    if not session.get('uuid'):
+        # Step 1. Visitor is unknown, give random ID
+        session['uuid'] = str(uuid.uuid4())
+
+    old_SCOPES = 'user-read-currently-playing playlist-modify-private'
+    SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read user-library-modify'
+
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL,
+                                               scope=SCOPES,
+                                               cache_handler=cache_handler,
+                                               show_dialog=True)
+
+    print(auth_manager.get_cached_token())
+
+    if request.args.get("code"):
+        # Step 3. Being redirected from Spotify auth page
+        auth_manager.get_access_token(request.args.get("code"))
+        # return redirect('/callback')
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        # Step 2. Display sign in link when no token
+        auth_url = auth_manager.get_authorize_url()
+        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+
+    # Step 4. Signed in, display data
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return jsonify("Signed in successfully!", 200)
 
 
 # @app.route('/sign_out')
