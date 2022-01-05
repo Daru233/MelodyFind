@@ -202,6 +202,8 @@ def codeTokenExchange(code):
     print("===================== RESPONSE DATA =====================")
     res_data = res.json()
     print(res_data)
+    print(res_data['access_token'])
+    print(res_data['refresh_token'])
 
     if res_data.get('error') or res.status_code != 200:
         print("===== response data error =====")
