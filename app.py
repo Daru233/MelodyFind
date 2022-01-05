@@ -208,7 +208,7 @@ def codeTokenExchange(code):
         return jsonify(res_data, 400)
     else:
         print("===== response success =====")
-        return jsonify({"nice": res_data}, 200)
+        return jsonify(res_data, 200)
 
 
 
