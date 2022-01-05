@@ -1,12 +1,13 @@
-from flask import Flask, jsonify, session, request, redirect
+from flask import Flask, jsonify, session, request, redirect, abort
 from flask_session import Session
 import uuid
 import os
 # import CONSTANTS
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials, SpotifyImplicitGrant
 from random import randint
 from flask_cors import CORS
+import requests
 
 # CLIENT_ID = CONSTANTS.Client_ID
 # CLIENT_SECRET = CONSTANTS.Client_Secret
@@ -169,15 +170,43 @@ def helloheroku():
     return jsonify({"hello": "world"}, 200)
 
 
-@app.route("/mf/v1/refresh", methods=["GET"])
-def refresh():
-    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
-                                               client_id=CLIENT_ID,
-                                               client_secret=CLIENT_SECRET,
-                                               redirect_uri=REDIRECT_URL)
+# @app.route("/mf/v1/refresh", methods=["GET"])
+# def refresh():
+#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+#     auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+#                                                client_id=CLIENT_ID,
+#                                                client_secret=CLIENT_SECRET,
+#                                                redirect_uri=REDIRECT_URL)
+#
+#     return jsonify(auth_manager.get_cached_token())
 
-    return jsonify(auth_manager.get_cached_token())
+@app.route("/exchange/<string:code>", methods=["GET"])
+def codeTokenExchange(code):
+    TOKEN_URL = "https://accounts.spotify.com/api/token"
+
+    RN_REDIRECT_URL = "exp://192.168.0.4:19000"
+
+    payload = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': RN_REDIRECT_URL,
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET
+    }
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+
+    res = requests.post(TOKEN_URL,headers=headers, data=payload)
+
+    res_data = res.json()
+
+    if res_data.get('error') or res.status_code != 200:
+        return jsonify(res_data, 400)
+
+    return jsonify({"nice": res_data}, 200)
+
 
 
 if __name__ == "__main__":
