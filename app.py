@@ -210,7 +210,9 @@ def codeTokenExchange(code):
         return make_response(jsonify(res_data, 400))
     else:
         print("===== response success =====")
-        return make_response(jsonify({'access_token': res_data['access_token'], 'refresh_token': res_data['refresh_token']}, 200))
+        response_tokens = {'access_token': res_data['access_token'],
+                           'refresh_token': res_data['refresh_token']}
+        return make_response(jsonify(response_tokens))
 
 
 
