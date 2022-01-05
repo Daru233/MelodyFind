@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, session, request, redirect, abort
+from flask import Flask, jsonify, session, request, redirect, make_response
 from flask_session import Session
 import uuid
 import os
@@ -207,10 +207,10 @@ def codeTokenExchange(code):
 
     if res_data.get('error') or res.status_code != 200:
         print("===== response data error =====")
-        return jsonify(res_data, 400)
+        return make_response(jsonify(res_data, 400))
     else:
         print("===== response success =====")
-        return jsonify({'access_token': res_data['access_token'], 'refresh_token': res_data['refresh_token']}, 200)
+        return make_response(jsonify({'access_token': res_data['access_token'], 'refresh_token': res_data['refresh_token']}, 200))
 
 
 
