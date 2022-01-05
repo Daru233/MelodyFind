@@ -203,8 +203,10 @@ def codeTokenExchange(code):
     res_data = res.json()
 
     if res_data.get('error') or res.status_code != 200:
+        print("===== response data error =====")
         return jsonify(res_data, 400)
 
+    print("===== response success =====")
     return jsonify({"nice": res_data}, 200)
 
 
