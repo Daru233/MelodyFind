@@ -199,15 +199,16 @@ def codeTokenExchange(code):
     }
 
     res = requests.post(TOKEN_URL,headers=headers, data=payload)
-
+    print("===================== RESPONSE DATA =====================")
     res_data = res.json()
+    print(res_data)
 
     if res_data.get('error') or res.status_code != 200:
         print("===== response data error =====")
         return jsonify(res_data, 400)
-
-    print("===== response success =====")
-    return jsonify({"nice": res_data}, 200)
+    else:
+        print("===== response success =====")
+        return jsonify({"nice": res_data}, 200)
 
 
 
