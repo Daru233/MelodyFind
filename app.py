@@ -8,6 +8,7 @@ from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials, SpotifyImplic
 from random import randint
 from flask_cors import CORS
 import requests
+import json
 
 # CLIENT_ID = CONSTANTS.Client_ID
 # CLIENT_SECRET = CONSTANTS.Client_Secret
@@ -26,6 +27,7 @@ CORS(app)
 caches_folder = './.spotify_caches/'
 if not os.path.exists(caches_folder):
     os.makedirs(caches_folder, exist_ok=True)
+
 
 def session_cache_path():
     return caches_folder + session.get('uuid')
@@ -112,7 +114,7 @@ def getARandomSong():
 
         random_playlist = playlists[0]
 
-        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+        FIELDS = 'items.track.album.images, items.track.id, items.track.name, items.track.href, items.track.uri,' \
                  'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
                  'total'
 
@@ -127,7 +129,7 @@ def getARandomSong():
         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
         response.append(playlist_items_result)
 
-        return jsonify(track_to_return, 200)
+        return jsonify(tracks_in_playlist, 200)
 
     else:
 
@@ -170,6 +172,31 @@ def helloheroku():
     return jsonify({"hello": "world"}, 200)
 
 
+@app.route("/start_playback", methods=["GET"])
+def startPlayback():
+    url = 'https://api.spotify.com/v1/me/player/play'
+    context_uri = 'spotify:artist:6AgTAQt8XS6jRWi4sX7w49'
+    token_raw = 'BQCvPBTg17n-7EEJjNlcHZGAww-XEPiN0N_YrA8ydX6MlxEW6MJCbLoOvqrgwXQT31KyP-GmtrWOoIdRJe4FB--7SFhZiUgtXY3V9sYjZ_VCWW9fy2_ZuIE_eAihmDFRdboGy-9zNQk7WLoU3pqNCbTlB1fES6LTTWXZI0vmnNq_IV256fpW5NH36zo'
+    token = 'Bearer ' + token_raw
+
+    headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+        "offset": {
+            "position": 5
+        },
+        "position_ms": 0
+    }
+
+    response = requests.put(url, headers=headers, data=json.dumps(data))
+
+    return make_response(jsonify({"response": 'response'}, 200))
+
+
 # @app.route("/mf/v1/refresh", methods=["GET"])
 # def refresh():
 #     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
@@ -198,7 +225,7 @@ def codeTokenExchange(code):
         'Content-Type': 'application/x-www-form-urlencoded',
     }
 
-    res = requests.post(TOKEN_URL,headers=headers, data=payload)
+    res = requests.post(TOKEN_URL, headers=headers, data=payload)
     print("===================== RESPONSE DATA =====================")
     res_data = res.json()
     print(res_data)
@@ -213,7 +240,6 @@ def codeTokenExchange(code):
         response_tokens = {'access_token': res_data['access_token'],
                            'refresh_token': res_data['refresh_token']}
         return make_response(jsonify(response_tokens))
-
 
 
 if __name__ == "__main__":
