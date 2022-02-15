@@ -150,7 +150,7 @@ def getARandomSong():
 
         playlist_chosen = playlists[0]
 
-        FIELDS = 'items.track.id, items.track.name, items.track.href, items.track.uri,' \
+        FIELDS = 'items.track.album.images, items.track.id, items.track.name, items.track.href, items.track.uri,' \
                  'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
                  'total'
 
