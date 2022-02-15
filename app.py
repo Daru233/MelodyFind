@@ -116,6 +116,7 @@ def getARandomSong():
 
         FIELDS = 'items.track.album.images, items.track.id, items.track.name, items.track.href, items.track.uri,' \
                  'items.track.artists.href, items.track.artists.id, items.track.artists.name, items.track.artists.uri,' \
+                 'items.track.preview_url,' \
                  'total'
 
         playlist_items_result = sp.playlist_items(
@@ -127,9 +128,9 @@ def getARandomSong():
             tracks_in_playlist.append(item)
 
         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
-        response.append(playlist_items_result)
+        response.append(track_to_return)
 
-        return jsonify(tracks_in_playlist, 200)
+        return jsonify(track_to_return, 200)
 
     else:
 
@@ -155,7 +156,7 @@ def getARandomSong():
 
         playlist_items_result = sp.playlist_items(
             playlist_id=playlist_chosen['id'],
-            fields=FIELDS,
+            # fields=FIELDS,
             additional_types=['track'])
 
         for item in playlist_items_result['items']:
@@ -175,10 +176,10 @@ def helloheroku():
 @app.route("/start_playback/<string:uri>", methods=["GET"])
 def startPlayback(uri):
     url = 'https://api.spotify.com/v1/me/player/play'
-    context_uri = 'spotify:artist:6AgTAQt8XS6jRWi4sX7w49'
-    token_raw = 'BQCvPBTg17n-7EEJjNlcHZGAww-XEPiN0N_YrA8ydX6MlxEW6MJCbLoOvqrgwXQT31KyP-GmtrWOoIdRJe4FB--7SFhZiUgtXY3V9sYjZ_VCWW9fy2_ZuIE_eAihmDFRdboGy-9zNQk7WLoU3pqNCbTlB1fES6LTTWXZI0vmnNq_IV256fpW5NH36zo'
-    token = 'Bearer ' + token_raw
+    context_uri = 'spotify:album:3G0b8ob9anYQl8a1t3GpOF'
     print(uri)
+    token_raw = 'BQCMUNGIavoSJWQHNRbtDAfVtWqNw_fgEa2dIfD06x73kgEOzz2kBe5cCSQ_9ashTQxzJA8VrFORQ5EYxsnNgS02RVnUBGSpD2QGA34f1wItFPDv2yZxRL7EudNdKQQ1PAvmKatgRmoDNKMVM6IrdiNBJMKJMx6salQQ3bQtCnZhYqvw_DFC2PpyBB0'
+    token = 'Bearer ' + token_raw
 
     headers = {
         'Authorization': token,
@@ -186,14 +187,12 @@ def startPlayback(uri):
     }
 
     data = {
-        "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-        "offset": {
-            "position": 5
-        },
-        "position_ms": 0
+        "uris": [uri]
     }
 
-    # response = requests.put(url, headers=headers, data=json.dumps(data))
+    response = requests.put(url, headers=headers, data=json.dumps(data))
+    res = str(response)
+    print(res)
 
     return make_response(jsonify({"response": 'response'}, 200))
 
