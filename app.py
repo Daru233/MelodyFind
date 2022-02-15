@@ -172,12 +172,13 @@ def helloheroku():
     return jsonify({"hello": "world"}, 200)
 
 
-@app.route("/start_playback", methods=["GET"])
-def startPlayback():
+@app.route("/start_playback/<string:uri>", methods=["GET"])
+def startPlayback(uri):
     url = 'https://api.spotify.com/v1/me/player/play'
     context_uri = 'spotify:artist:6AgTAQt8XS6jRWi4sX7w49'
     token_raw = 'BQCvPBTg17n-7EEJjNlcHZGAww-XEPiN0N_YrA8ydX6MlxEW6MJCbLoOvqrgwXQT31KyP-GmtrWOoIdRJe4FB--7SFhZiUgtXY3V9sYjZ_VCWW9fy2_ZuIE_eAihmDFRdboGy-9zNQk7WLoU3pqNCbTlB1fES6LTTWXZI0vmnNq_IV256fpW5NH36zo'
     token = 'Bearer ' + token_raw
+    print(uri)
 
     headers = {
         'Authorization': token,
@@ -192,7 +193,7 @@ def startPlayback():
         "position_ms": 0
     }
 
-    response = requests.put(url, headers=headers, data=json.dumps(data))
+    # response = requests.put(url, headers=headers, data=json.dumps(data))
 
     return make_response(jsonify({"response": 'response'}, 200))
 
