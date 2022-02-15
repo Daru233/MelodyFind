@@ -156,7 +156,7 @@ def getARandomSong():
 
         playlist_items_result = sp.playlist_items(
             playlist_id=playlist_chosen['id'],
-            # fields=FIELDS,
+            fields=FIELDS,
             additional_types=['track'])
 
         for item in playlist_items_result['items']:
