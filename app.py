@@ -130,7 +130,7 @@ def getARandomSong():
         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
         response.append(track_to_return)
 
-        return jsonify(track_to_return, 200)
+        return jsonify(tracks_in_playlist, 200)
 
     else:
 
