@@ -173,16 +173,40 @@ def helloheroku():
     return jsonify({"hello": "world"}, 200)
 
 
-@app.route("/start_playback/<string:uri>", methods=["GET"])
-def startPlayback(uri):
-    url = 'https://api.spotify.com/v1/me/player/play'
-    context_uri = 'spotify:album:3G0b8ob9anYQl8a1t3GpOF'
-    print(uri)
-    token_raw = 'BQCMUNGIavoSJWQHNRbtDAfVtWqNw_fgEa2dIfD06x73kgEOzz2kBe5cCSQ_9ashTQxzJA8VrFORQ5EYxsnNgS02RVnUBGSpD2QGA34f1wItFPDv2yZxRL7EudNdKQQ1PAvmKatgRmoDNKMVM6IrdiNBJMKJMx6salQQ3bQtCnZhYqvw_DFC2PpyBB0'
-    token = 'Bearer ' + token_raw
+@app.route("/me/<string:token>", methods=["GET"])
+def getProfile(token):
+    url = 'https://api.spotify.com/v1/me'
+
+    print(token)
 
     headers = {
-        'Authorization': token,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 401:
+        pass  # refresh token
+        return make_response(jsonify({'invalid token': 'refresh token'}, 401))
+
+    if response.status_code == 200:
+        print(response.status_code)
+        response = str(response.json())
+        print(response)
+        return make_response(jsonify(response, 200))
+
+    return make_response(jsonify(response, 200))
+
+
+@app.route("/start_playback/<string:uriToken>", methods=["GET"])
+def startPlayback(uriToken):
+    url = 'https://api.spotify.com/v1/me/player/play'
+    uri = uriToken.split('+')[0]
+    token = uriToken.split('+')[1]
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
     }
 
@@ -190,9 +214,9 @@ def startPlayback(uri):
         "uris": [uri]
     }
 
-    response = requests.put(url, headers=headers, data=json.dumps(data))
-    res = str(response)
-    print(res)
+    # response = requests.put(url, headers=headers, data=json.dumps(data))
+    # res = str(response)
+    # print(res)
 
     return make_response(jsonify({"response": 'response'}, 200))
 
