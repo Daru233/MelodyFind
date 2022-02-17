@@ -179,6 +179,8 @@ def getProfile(token):
 
     print(token)
 
+    # token = 'BQB5acXIUmbYTp9O2wKoK-yZV_tt91RMpL_pXtuQEXxWlcG270ETUYmEh_L7093hXLXU-nTn7Y6IAdpfsMAZKkjBRR38Psb1ipLoNIgbMB6R3qGfxhz1InP1lh1CHGCv52bU6KttHXcZwPqX6AuGScDA_l1r0_TJ8g4AMiydAW4OT0AtKHU02LqbiCc'
+
     headers = {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
@@ -186,7 +188,7 @@ def getProfile(token):
 
     response = requests.get(url, headers=headers)
 
-    return make_response(jsonify({'response': response.reason}, response.status_code))
+    return make_response(jsonify({'response': response.json()}, response.status_code))
 
     # if response.status_code == 401:
     #     pass  # refresh token
