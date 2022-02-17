@@ -186,15 +186,17 @@ def getProfile(token):
 
     response = requests.get(url, headers=headers)
 
-    if response.status_code == 401:
-        pass  # refresh token
-        return make_response(jsonify({'invalid token': 'refresh token'}, 401))
+    return make_response(jsonify({'response': response.reason}, response.status_code))
 
-    if response.status_code == 200:
-        print(response.status_code)
-        response = str(response.json())
-        print(response)
-        return make_response(jsonify(response, 200))
+    # if response.status_code == 401:
+    #     pass  # refresh token
+    #     return make_response(jsonify({'invalid token': 'refresh token'}, 401))
+    #
+    # if response.status_code == 200:
+    #     print(response.status_code)
+    #     response = str(response.json())
+    #     print(response)
+    #     return make_response(jsonify(response, 200))
 
 
 @app.route("/start_playback/<string:uriToken>", methods=["GET"])
@@ -265,5 +267,7 @@ def codeTokenExchange(code):
 
 
 if __name__ == "__main__":
+
     app.run(debug=True, use_reloader=True)
+
     # app.run(ssl_context='adhoc')
