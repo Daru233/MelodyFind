@@ -196,8 +196,6 @@ def getProfile(token):
         print(response)
         return make_response(jsonify(response, 200))
 
-    return make_response(jsonify(response, 200))
-
 
 @app.route("/start_playback/<string:uriToken>", methods=["GET"])
 def startPlayback(uriToken):
