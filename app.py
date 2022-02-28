@@ -2,27 +2,36 @@ from flask import Flask, jsonify, session, request, redirect, make_response
 from flask_session import Session
 import uuid
 import os
-# import CONSTANTS
+import CONSTANTS
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials, SpotifyImplicitGrant
-from random import randint
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
+from random import randint, sample
 from flask_cors import CORS
 import requests
-import json
+import logging
+from logging.config import dictConfig
 
-# CLIENT_ID = CONSTANTS.Client_ID
-# CLIENT_SECRET = CONSTANTS.Client_Secret
-# REDIRECT_URL = CONSTANTS.Redirect_URL
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('MelodyFind')
+
+
+CLIENT_ID = CONSTANTS.Client_ID
+CLIENT_SECRET = CONSTANTS.Client_Secret
+REDIRECT_URL = CONSTANTS.Redirect_URL
 
 app = Flask(__name__)
-CLIENT_ID = os.environ.get('Client_ID')
-CLIENT_SECRET = os.environ.get('Client_Secret')
-REDIRECT_URL = os.environ.get('Heroku_URL')
+# CLIENT_ID = os.environ.get('Client_ID')
+# CLIENT_SECRET = os.environ.get('Client_Secret')
+# REDIRECT_URL = os.environ.get('Heroku_URL')
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 CORS(app)
+
+categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
+              'pop', 'mood', 'latin', 'indie_alt', 'alternative', 'fresh_finds', 'country', 'classical', 'soul',
+              'metal', 'jazz', 'throwback', 'rnb', 'alt']
 
 caches_folder = './.spotify_caches/'
 if not os.path.exists(caches_folder):
@@ -31,6 +40,24 @@ if not os.path.exists(caches_folder):
 
 def session_cache_path():
     return caches_folder + session.get('uuid')
+
+
+def decorator_is_token_valid(refresh_token_function):
+    def wrapper_is_token_valid(arg1, arg2):
+        print('Before function')
+        refresh_token_function(arg1, arg2)
+        print('After function')
+
+    return wrapper_is_token_valid
+
+
+@decorator_is_token_valid
+def print_name(first, last):
+    print(first, last)
+
+
+print_name('Michael', 'Malto')
+app.logger.info('This is a log')
 
 
 @app.route('/callback', methods=['GET'])
@@ -130,7 +157,7 @@ def getARandomSong():
         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
         response.append(track_to_return)
 
-        return jsonify(tracks_in_playlist, 200)
+        return jsonify(tracks_in_playlist)
 
     else:
 
@@ -165,7 +192,7 @@ def getARandomSong():
         track_to_return = tracks_in_playlist[randint(0, playlist_items_result['total'] - 1)]
         response.append(playlist_items_result)
 
-        return jsonify(tracks_in_playlist, 200)
+        return jsonify(tracks_in_playlist)
 
 
 @app.route("/", methods=["GET"])
@@ -179,7 +206,7 @@ def getProfile(token):
 
     print(token)
 
-    # token = 'BQB5acXIUmbYTp9O2wKoK-yZV_tt91RMpL_pXtuQEXxWlcG270ETUYmEh_L7093hXLXU-nTn7Y6IAdpfsMAZKkjBRR38Psb1ipLoNIgbMB6R3qGfxhz1InP1lh1CHGCv52bU6KttHXcZwPqX6AuGScDA_l1r0_TJ8g4AMiydAW4OT0AtKHU02LqbiCc'
+    token = 'BQBLXUJqLcdeWABmMIWgJ57RnuDNtCia3CmqQeKbI0gQVlAS9XHs7-vHBchMXlXyUD5FN2vj4qdBvXNkzx5sxgDldcJe9WO9ZuEQesff9CePMK1vHUpPgi7278ovYIJzHhi-vbWeIBMt_fgGWXhcwjLk8ae4jrfKLIqX9nRXAzB7gGl7jWBT9afR0PI'
 
     headers = {
         'Authorization': 'Bearer ' + token,
@@ -191,14 +218,45 @@ def getProfile(token):
     return make_response(jsonify({'response': response.json()}, response.status_code))
 
     # if response.status_code == 401:
-    #     pass  # refresh token
-    #     return make_response(jsonify({'invalid token': 'refresh token'}, 401))
+    #      # refresh token function
+    #     refreshToken(token)
+    #     return make_response(jsonify({'response': response.json()}, response.status_code))
     #
     # if response.status_code == 200:
     #     print(response.status_code)
-    #     response = str(response.json())
     #     print(response)
-    #     return make_response(jsonify(response, 200))
+    #     return make_response(jsonify({'response': response.json()}, response.status_code))
+
+
+@app.route('/me/playlists/<string:token>', methods=['GET'])
+def get_playlists(token):
+    url = 'https://api.spotify.com/v1/me/playlists'
+    token = 'BQBBDOHitEMCrKIQvcW7BGadR2KO9MJxwmvSvqPeWvZb26CBGROBDHZK7IY3IUs0c4-OFd-1o9ZnIfenooHHOYLEZKocbPxbytYCE8TareddTpyeyR73ZB_aq-jjQ7edR1PBYa7rDKUdyMti2nfXWbXmKL15kwUxWHCvGvn6CKfiOk63P8jHQXusL1Q'
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        'offset': 2
+    }
+
+    url_with_query = url + '?limit=20&offset=2'
+
+    response = requests.get(url_with_query, headers=headers)
+    res = response.reason
+    print(res)
+
+    item_count = 0
+
+    # for item in res['items']:
+    #     print(item)
+    #     item_count += 1
+    #
+    # print(item_count)
+
+    return make_response(response.json(), response.status_code)
+    # return make_response(jsonify({'yeet': 'yeeeet'}))
 
 
 @app.route("/start_playback/<string:uriToken>", methods=["GET"])
@@ -223,15 +281,16 @@ def startPlayback(uriToken):
     return make_response(jsonify({"response": 'response'}, 200))
 
 
-# @app.route("/mf/v1/refresh", methods=["GET"])
-# def refresh():
-#     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-#     auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
-#                                                client_id=CLIENT_ID,
-#                                                client_secret=CLIENT_SECRET,
-#                                                redirect_uri=REDIRECT_URL)
-#
-#     return jsonify(auth_manager.get_cached_token())
+@app.route("/mf/v1/refresh", methods=["GET"])
+def refresh():
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,
+                                               client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URL)
+
+    return jsonify(auth_manager.get_cached_token())
+
 
 @app.route("/exchange/<string:code>", methods=["GET"])
 def codeTokenExchange(code):
@@ -268,8 +327,45 @@ def codeTokenExchange(code):
         return make_response(jsonify(response_tokens))
 
 
-if __name__ == "__main__":
+@app.route("/mf/v1/recommendation", methods=["GET"])
+def recommendation():
+    # TODO take in access token as args
+    token = request.headers['Authorization'].split()[1]
 
+    # TODO get 5 unique random genre seeds from genre list
+    categories_seeds = sample(categories, k=2)
+
+    # TODO use the genre seeds for /recommendations as seeds
+    request_url = 'https://api.spotify.com/v1/recommendations'
+    params = {'seed_artists': '', 'seed_genres': 'toplists,' + ','.join(categories_seeds), 'seed_tracks': ''}
+    print(params)
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.get(request_url, params=params, headers=headers)
+
+    # TODO format the returned data so only track, artists and images are returned
+    # TODO return the data to react native
+
+    # only checking for 401 because this API will not be exposed publicly
+    # will only be accessed through UI interface
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            message += response.reason
+            app.logger.info(message)
+            return make_response(response.json())
+        return make_response(response.json())
+
+    tracks = response.json()['tracks']
+    print(tracks)
+    return make_response(jsonify(tracks))
+
+
+if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
 
     # app.run(ssl_context='adhoc')
