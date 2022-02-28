@@ -326,6 +326,7 @@ def codeTokenExchange(code):
 
 @app.route("/mf/v1/recommendation", methods=["GET"])
 def recommendation():
+    # no need to check if auth is present because this app api will not be exposed publicly
     # TODO take in access token as args
     token = request.headers['Authorization'].split()[1]
 
@@ -358,6 +359,9 @@ def recommendation():
         return make_response(response.json())
 
     tracks = response.json()['tracks']
+    for track in tracks:
+        del track['available_markets']
+        del track['album']['available_markets']
     print(tracks)
     return make_response(jsonify(tracks))
 
