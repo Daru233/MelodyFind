@@ -2,9 +2,8 @@ from flask import Flask, jsonify, session, request, redirect, make_response
 from flask_session import Session
 import uuid
 import os
-import CONSTANTS
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyClientCredentials
 from random import randint, sample
 from flask_cors import CORS
 import requests
@@ -14,15 +13,13 @@ from logging.config import dictConfig
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger('MelodyFind')
 
-
-CLIENT_ID = CONSTANTS.Client_ID
-CLIENT_SECRET = CONSTANTS.Client_Secret
-REDIRECT_URL = CONSTANTS.Redirect_URL
-
 app = Flask(__name__)
-# CLIENT_ID = os.environ.get('Client_ID')
-# CLIENT_SECRET = os.environ.get('Client_Secret')
-# REDIRECT_URL = os.environ.get('Heroku_URL')
+CLIENT_ID = os.environ.get('Client_ID')
+CLIENT_SECRET = os.environ.get('Client_Secret')
+REDIRECT_URL = os.environ.get('Heroku_URL')
+test_var = os.environ.get('DARU')
+print('TEST VARIABLE IS ', test_var)
+
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
@@ -367,5 +364,3 @@ def recommendation():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
-
-    # app.run(ssl_context='adhoc')
