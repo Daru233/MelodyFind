@@ -5,6 +5,7 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from random import randint, sample
+import json
 from flask_cors import CORS
 import requests
 import logging
@@ -256,28 +257,6 @@ def get_playlists(token):
     # return make_response(jsonify({'yeet': 'yeeeet'}))
 
 
-@app.route("/start_playback/<string:uriToken>", methods=["GET"])
-def startPlayback(uriToken):
-    url = 'https://api.spotify.com/v1/me/player/play'
-    uri = uriToken.split('+')[0]
-    token = uriToken.split('+')[1]
-
-    headers = {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-    }
-
-    data = {
-        "uris": [uri]
-    }
-
-    # response = requests.put(url, headers=headers, data=json.dumps(data))
-    # res = str(response)
-    # print(res)
-
-    return make_response(jsonify({"response": 'response'}, 200))
-
-
 @app.route("/mf/v1/refresh", methods=["GET"])
 def refresh():
     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
@@ -327,6 +306,7 @@ def codeTokenExchange(code):
 @app.route("/mf/v1/recommendation", methods=["GET"])
 def recommendation():
     # no need to check if auth is present because this app api will not be exposed publicly
+    # should I still have a check for good practice
     # TODO take in access token as args
     token = request.headers['Authorization'].split()[1]
 
@@ -362,8 +342,39 @@ def recommendation():
     for track in tracks:
         del track['available_markets']
         del track['album']['available_markets']
+
+
     print(tracks)
     return make_response(jsonify(tracks))
+
+
+@app.route("/mf/v1/start_playback/<string:track_uri>", methods=["GET"])
+def start_playback(track_uri):
+    request_url = 'https://api.spotify.com/v1/me/player/play'
+    token = request.headers['Authorization'].split()[1]
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        "uris": [track_uri]
+    }
+
+    response = requests.put(request_url, headers=headers, data=json.dumps(data))
+    res = str(response)
+    print(res)
+
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            message += response.reason
+            app.logger.info(message)
+            return make_response(response.reason)
+        return make_response(response.reason)
+
+    return make_response(response.status_code)
 
 
 if __name__ == "__main__":
