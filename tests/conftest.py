@@ -21,7 +21,7 @@ def auth(valid_auth, invalid_auth):
 @pytest.fixture()
 def valid_auth():
     headers = {
-        'Authorization': 'bearer mockTocken123'
+        'Authorization': 'bearer mockToken123'
     }
 
     yield headers
@@ -30,7 +30,7 @@ def valid_auth():
 @pytest.fixture()
 def invalid_auth():
     headers = {
-        'Authorization': 'not_bearer mockTocken123'
+        'Authorization': 'not_bearer mockToken123'
     }
 
     yield headers
