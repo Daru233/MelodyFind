@@ -1,6 +1,5 @@
 from functools import wraps
-from flask import Flask, jsonify, request, make_response, Blueprint
-from flask_session import Session
+from flask import Flask, jsonify, request, make_response
 import os
 from os import path
 from random import sample
@@ -19,10 +18,6 @@ CLIENT_ID = os.environ.get('Client_ID')
 CLIENT_SECRET = os.environ.get('Client_Secret')
 REDIRECT_URL = os.environ.get('Heroku_URL')
 
-app.config['SECRET_KEY'] = os.urandom(64)
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_FILE_DIR'] = './.flask_session/'
-Session(app)
 CORS(app)
 
 categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
@@ -151,7 +146,7 @@ def recommendation():
         del track['available_markets']
         del track['album']['available_markets']
 
-    return make_response(jsonify(tracks))
+    return make_response(jsonify(tracks), 200)
 
 
 @app.route("/mf/v1/recommendation/<string:genre>", methods=["GET"])
@@ -170,11 +165,13 @@ def genre_recommendation(genre):
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
-            if isinstance(response.reason, str):
+            try:
                 message += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
             app.logger.info(message)
-            return make_response(response.json())
-        return make_response(response.json())
+            return make_response(jsonify(response.reason), response.status_code)
+        return make_response(jsonify(response.reason), response.status_code)
 
     tracks = response.json()['tracks']
     for track in tracks:
