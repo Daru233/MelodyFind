@@ -25,7 +25,6 @@ app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 CORS(app)
 
-
 categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
               'pop', 'mood', 'latin', 'indie_alt', 'alternative', 'fresh_finds', 'country', 'classical', 'soul',
               'metal', 'jazz', 'throwback', 'rnb', 'alt']
@@ -45,6 +44,7 @@ def auth_required(func):
             return make_response(jsonify({'reason': 'bearer token is required'}), 401)
 
         return func(*args, **kwargs)
+
     return has_token_wrapper
 
 
@@ -122,7 +122,6 @@ def codeTokenExchange(code):
 @app.route("/mf/v1/recommendation", methods=["GET"])
 @auth_required
 def recommendation():
-
     token = request.headers['Authorization'].split()[1]
     categories_seeds = sample(categories, k=1)
 
@@ -139,10 +138,13 @@ def recommendation():
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
-            message += response.reason
+            try:
+                message += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
             app.logger.info(message)
-            return make_response(response.json())
-        return make_response(response.json())
+            return make_response(jsonify(response.reason), response.status_code)
+        return make_response(jsonify(response.reason), response.status_code)
 
     tracks = response.json()['tracks']
     for track in tracks:
@@ -168,7 +170,8 @@ def genre_recommendation(genre):
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
-            message += response.reason
+            if isinstance(response.reason, str):
+                message += response.reason
             app.logger.info(message)
             return make_response(response.json())
         return make_response(response.json())
