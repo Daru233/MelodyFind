@@ -1,6 +1,5 @@
 from functools import wraps
-
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, Blueprint
 from flask_session import Session
 import os
 from os import path
@@ -56,34 +55,6 @@ def helloheroku():
     response = requests.get(json_placeholder_url)
     status = response.status_code
     return make_response(jsonify({'reason': 'hello_world'}), status)
-
-
-@app.route("/me/<string:token>", methods=["GET"])
-def getProfile(token):
-    url = 'https://api.spotify.com/v1/me'
-
-    print(token)
-
-    token = 'BQBLXUJqLcdeWABmMIWgJ57RnuDNtCia3CmqQeKbI0gQVlAS9XHs7-vHBchMXlXyUD5FN2vj4qdBvXNkzx5sxgDldcJe9WO9ZuEQesff9CePMK1vHUpPgi7278ovYIJzHhi-vbWeIBMt_fgGWXhcwjLk8ae4jrfKLIqX9nRXAzB7gGl7jWBT9afR0PI'
-
-    headers = {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-    }
-
-    response = requests.get(url, headers=headers)
-
-    return make_response(jsonify({'response': response.json()}, response.status_code))
-
-    # if response.status_code == 401:
-    #      # refresh token function
-    #     refreshToken(token)
-    #     return make_response(jsonify({'response': response.json()}, response.status_code))
-    #
-    # if response.status_code == 200:
-    #     print(response.status_code)
-    #     print(response)
-    #     return make_response(jsonify({'response': response.json()}, response.status_code))
 
 
 @app.route('/me/playlists/<string:token>', methods=['GET'])
@@ -165,8 +136,6 @@ def recommendation():
     }
 
     response = requests.get(request_url, params=params, headers=headers)
-    # only checking for 401 because this API will not be exposed publicly
-    # will only be accessed through UI interface
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
