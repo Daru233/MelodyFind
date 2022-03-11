@@ -83,6 +83,32 @@ def get_playlists(token):
     # return make_response(jsonify({'yeet': 'yeeeet'}))
 
 
+@app.route("/mf/v1/me", methods=["GET"])
+def get_profile():
+    REQUEST_URL = "https://api.spotify.com/v1/me"
+    token = request.headers['Authorization'].split()[1]
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.get(REQUEST_URL, headers=headers)
+
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message_401 = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            try:
+                message_401 += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            app.logger.info(message_401)
+            return make_response(jsonify(response.reason), response.status_code)
+        message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+        app.logger.info(message)
+        return make_response(jsonify(response.reason), response.status_code)
+
+
 @app.route("/exchange/<string:code>", methods=["GET"])
 def codeTokenExchange(code):
     TOKEN_URL = "https://accounts.spotify.com/api/token"
