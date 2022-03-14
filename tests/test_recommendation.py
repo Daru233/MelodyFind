@@ -42,7 +42,7 @@ def test_givenValidRequest_whenSpotifyReturns503_thenReturn503(client, auth, req
 
 # TODO valid request, spotify returns 200
 def test_givenValidRequest_whenSpotifyReturns200_thenReturn200(client, auth, requests_mock):
-    json = {
+    example_response_json = {
         'tracks': [
             {
                 'available_markets': 'en',
@@ -62,7 +62,7 @@ def test_givenValidRequest_whenSpotifyReturns200_thenReturn200(client, auth, req
         'track': {'id': ''}
     }]
 
-    requests_mock.get(mock_url, status_code=200, json=json)
+    requests_mock.get(mock_url, status_code=200, json=example_response_json)
     response = client.get(url, headers=auth['valid_auth'])
 
     assert response.status_code == 200
