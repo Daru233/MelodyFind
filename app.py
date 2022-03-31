@@ -21,7 +21,7 @@ REDIRECT_URL = os.environ.get('Heroku_URL')
 CORS(app)
 
 categories = ['toplists', 'hiphop', 'workout', 'edm_dance', 'alternative', 'rock', 'gaming', 'punk', 'kpop',
-              'pop', 'mood', 'latin', 'indie_alt', 'alternative', 'fresh_finds', 'country', 'classical', 'soul',
+              'pop', 'mood', 'latin', 'indie_alt', 'fresh_finds', 'country', 'classical', 'soul',
               'metal', 'jazz', 'throwback', 'rnb', 'alt']
 
 
@@ -84,6 +84,7 @@ def get_playlists(token):
 
 
 @app.route("/mf/v1/me", methods=["GET"])
+@auth_required
 def get_profile():
     REQUEST_URL = "https://api.spotify.com/v1/me"
     token = request.headers['Authorization'].split()[1]
@@ -110,10 +111,10 @@ def get_profile():
 
 
 @app.route("/exchange/<string:code>", methods=["GET"])
-def codeTokenExchange(code):
-    TOKEN_URL = "https://accounts.spotify.com/api/token"
+def code_token_exchange(code):
+    TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-    RN_REDIRECT_URL = "exp://192.168.0.4:19000"
+    RN_REDIRECT_URL = 'exp://192.168.0.4:19000'
 
     payload = {
         'grant_type': 'authorization_code',
@@ -127,17 +128,31 @@ def codeTokenExchange(code):
         'Content-Type': 'application/x-www-form-urlencoded',
     }
 
-    res = requests.post(TOKEN_URL, headers=headers, data=payload)
-    res_data = res.json()
+    response = requests.post(TOKEN_URL, headers=headers, data=payload)
+    res_data = response.json()
 
-    if res_data.get('error') or res.status_code != 200:
-        print("===== response data error =====")
-        return make_response(jsonify(res_data, 400))
-    else:
-        print("===== response success =====")
-        response_tokens = {'access_token': res_data['access_token'],
-                           'refresh_token': res_data['refresh_token']}
-        return make_response(jsonify(response_tokens))
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            try:
+                message += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            app.logger.info(message)
+            return make_response(jsonify(response.reason), response.status_code)
+        return make_response(jsonify(response.reason), response.status_code)
+
+    # if res_data.get('error') or response.status_code != 200:
+    #     print("===== response data error =====")
+    #     return make_response(jsonify(res_data, 400))
+    # else:
+    #     print("===== response success =====")
+    #     response_tokens = {'access_token': res_data['access_token'],
+    #                        'refresh_token': res_data['refresh_token']}
+    #     return make_response(jsonify(response_tokens), response.status_code)
+    response_tokens = {'access_token': res_data['access_token'],
+                       'refresh_token': res_data['refresh_token']}
+    return make_response(jsonify(response_tokens), response.status_code)
 
 
 @app.route("/mf/v1/recommendation", methods=["GET"])
@@ -176,6 +191,7 @@ def recommendation():
 
 
 @app.route("/mf/v1/recommendation/<string:genre>", methods=["GET"])
+@auth_required
 def genre_recommendation(genre):
     token = request.headers['Authorization'].split()[1]
     request_url = 'https://api.spotify.com/v1/recommendations'
