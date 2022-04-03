@@ -4,7 +4,7 @@
     <list default="true" id="5857df31-554f-4d7d-b894-34a5704875d5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_recommendation_genre.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_recommendation_genre.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_code_token_exchange.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_code_token_exchange.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,8 +212,8 @@
       <item itemvalue="Python.app" />
       <item itemvalue="Python.conftest" />
       <item itemvalue="Python.test_base_route (1)" />
-      <item itemvalue="Python.test_recommendation" />
       <item itemvalue="Python.test_code_token_exchange" />
+      <item itemvalue="Python.test_recommendation" />
     </list>
     <recent_temporary>
       <list>

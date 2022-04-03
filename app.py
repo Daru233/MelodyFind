@@ -109,6 +109,9 @@ def get_profile():
         app.logger.info(message)
         return make_response(jsonify(response.reason), response.status_code)
 
+    response = response.json()
+    return make_response(jsonify(response))
+
 
 @app.route("/exchange/<string:code>", methods=["GET"])
 def code_token_exchange(code):
@@ -224,6 +227,7 @@ def genre_recommendation(genre):
 
 
 @app.route("/mf/v1/start_playback/<string:track_uri>", methods=["GET"])
+@auth_required
 def start_playback(track_uri):
     request_url = 'https://api.spotify.com/v1/me/player/play'
     token = request.headers['Authorization'].split()[1]
@@ -244,8 +248,8 @@ def start_playback(track_uri):
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
             message += response.reason
             app.logger.info(message)
-            return make_response(response.reason)
-        return make_response(response.reason)
+            return make_response(jsonify(response.reason), response.status_code)
+        return make_response(jsonify(response.reason), response.status_code)
 
     return make_response(response.status_code)
 
