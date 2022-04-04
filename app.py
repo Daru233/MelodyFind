@@ -223,7 +223,7 @@ def genre_recommendation(genre):
         del track['available_markets']
         del track['album']['available_markets']
 
-    return make_response(jsonify(tracks))
+    return make_response(jsonify(tracks), 200)
 
 
 @app.route("/mf/v1/start_playback/<string:track_uri>", methods=["GET"])
