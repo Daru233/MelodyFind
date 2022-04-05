@@ -197,16 +197,14 @@ def recommendation():
 @auth_required
 def genre_recommendation(genre):
     token = request.headers['Authorization'].split()[1]
-    request_url = 'https://api.spotify.com/v1/recommendations'
-    params = {'seed_artists': '', 'seed_genres': genre, 'seed_tracks': ''}
+    request_url = 'https://api.spotify.com/v1/search?q=' + genre + '&type=track'
 
     headers = {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
     }
 
-    response = requests.get(request_url, params=params, headers=headers)
-
+    response = requests.get(request_url, headers=headers)
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
@@ -219,7 +217,7 @@ def genre_recommendation(genre):
         return make_response(jsonify(response.reason), response.status_code)
 
     tracks = response.json()['tracks']
-    for track in tracks:
+    for track in tracks['items']:
         del track['available_markets']
         del track['album']['available_markets']
 

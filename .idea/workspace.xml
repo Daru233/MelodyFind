@@ -207,9 +207,9 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.melodyfind" />
       <item itemvalue="Python.app" />
       <item itemvalue="Python.conftest" />
-      <item itemvalue="Python.melodyfind" />
       <item itemvalue="Python.test_base_route (1)" />
       <item itemvalue="Python.test_code_token_exchange" />
       <item itemvalue="Python.test_recommendation" />
