@@ -197,7 +197,7 @@ def recommendation():
 @auth_required
 def genre_recommendation(genre):
     token = request.headers['Authorization'].split()[1]
-    request_url = 'https://api.spotify.com/v1/search?q=' + genre + '&type=track'
+    request_url = 'https://api.spotify.com/v1/search?q=' + genre + '&type=track&genre=' + genre
 
     headers = {
         'Authorization': 'Bearer ' + token,
