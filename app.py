@@ -241,7 +241,7 @@ def start_playback(track_uri):
 
     response = requests.put(request_url, headers=headers, data=json.dumps(data))
 
-    if response.status_code != 200:
+    if response.status_code != 204:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
             message += response.reason
