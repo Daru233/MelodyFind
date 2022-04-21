@@ -52,49 +52,17 @@ def helloheroku():
     return make_response(jsonify({'reason': 'hello_world'}), status)
 
 
-@app.route('/me/playlists/<string:token>', methods=['GET'])
-def get_playlists(token):
-    url = 'https://api.spotify.com/v1/me/playlists'
-    token = 'BQBBDOHitEMCrKIQvcW7BGadR2KO9MJxwmvSvqPeWvZb26CBGROBDHZK7IY3IUs0c4-OFd-1o9ZnIfenooHHOYLEZKocbPxbytYCE8TareddTpyeyR73ZB_aq-jjQ7edR1PBYa7rDKUdyMti2nfXWbXmKL15kwUxWHCvGvn6CKfiOk63P8jHQXusL1Q'
-    headers = {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-    }
-
-    data = {
-        'offset': 2
-    }
-
-    url_with_query = url + '?limit=20&offset=2'
-
-    response = requests.get(url_with_query, headers=headers)
-    res = response.reason
-    print(res)
-
-    item_count = 0
-
-    # for item in res['items']:
-    #     print(item)
-    #     item_count += 1
-    #
-    # print(item_count)
-
-    return make_response(response.json(), response.status_code)
-    # return make_response(jsonify({'yeet': 'yeeeet'}))
-
-
-@app.route("/mf/v1/me", methods=["GET"])
+@app.route('/mf/v1/playlists', methods=['GET'])
 @auth_required
-def get_profile():
-    REQUEST_URL = "https://api.spotify.com/v1/me"
+def get_playlists():
+    url = 'https://api.spotify.com/v1/me/playlists?limit=20&offset=0'
     token = request.headers['Authorization'].split()[1]
-
     headers = {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
     }
 
-    response = requests.get(REQUEST_URL, headers=headers)
+    response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
         if response.status_code == 401:
@@ -110,6 +78,38 @@ def get_profile():
         return make_response(jsonify(response.reason), response.status_code)
 
     response = response.json()
+    return make_response(jsonify(response))
+
+
+@app.route("/mf/v1/me", methods=["GET"])
+@auth_required
+def get_profile():
+    REQUEST_URL = "https://api.spotify.com/v1/me"
+    token = request.headers['Authorization'].split()[1]
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.get(REQUEST_URL, headers=headers)
+    print(response.reason)
+
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message_401 = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            try:
+                message_401 += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            app.logger.info(message_401)
+            return make_response(jsonify(response.reason), response.status_code)
+        message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+        app.logger.info(message)
+        return make_response(jsonify(response.reason), response.status_code)
+
+    response = response.json()
+
     return make_response(jsonify(response))
 
 
@@ -249,12 +249,13 @@ def start_playback(track_uri):
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
-    return make_response(response.status_code)
+    return make_response(jsonify({'request': 'success'}), 204)
 
 
 @app.route("/mf/v1/save_track/<string:track_uri>", methods=["GET"])
 @auth_required
 def save_track(track_uri):
+    print('Inside the save_track method!')
     token = request.headers['Authorization'].split()[1]
     track_uri = track_uri.split(':')[2]
     print(track_uri)
@@ -271,7 +272,8 @@ def save_track(track_uri):
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
             message += response.reason
-            app.logger.info(message)
+            app.logger.warning(message)
+            logger.warning(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
@@ -279,4 +281,4 @@ def save_track(track_uri):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=True)
+    app.run(host='0.0.0.0', debug=True, use_reloader=True)
