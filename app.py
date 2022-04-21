@@ -257,6 +257,7 @@ def start_playback(track_uri):
 def save_track(track_uri):
     token = request.headers['Authorization'].split()[1]
     track_uri = track_uri.split(':')[2]
+    print(track_uri)
     request_url = 'https://api.spotify.com/v1/me/tracks?ids=' + track_uri
 
     headers = {
