@@ -252,5 +252,30 @@ def start_playback(track_uri):
     return make_response(response.status_code)
 
 
+@app.route("/mf/v1/save_track/<string:track_uri>", methods=["GET"])
+@auth_required
+def save_track(track_uri):
+    token = request.headers['Authorization'].split()[1]
+    track_uri = track_uri.split(':')[2]
+    request_url = 'https://api.spotify.com/v1/me/tracks?ids=' + track_uri
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.put(request_url, headers=headers)
+
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            message += response.reason
+            app.logger.info(message)
+            return make_response(jsonify(response.reason), response.status_code)
+        return make_response(jsonify(response.reason), response.status_code)
+
+    return make_response(jsonify(response.reason), response.status_code)
+
+
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
