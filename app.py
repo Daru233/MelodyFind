@@ -77,8 +77,53 @@ def get_playlists():
         app.logger.info(message)
         return make_response(jsonify(response.reason), response.status_code)
 
-    response = response.json()
-    return make_response(jsonify(response))
+    playlists = response.json()['items']
+    for playlist in playlists:
+        del playlist['external_urls']
+        del playlist['owner']
+
+    return make_response(jsonify(playlists), 200)
+
+
+@app.route('/mf/v1/add_to_playlists/<string:playlist_id>/<string:track_id>', methods=['GET'])
+@auth_required
+def add_to_playlists(playlist_id, track_id):
+    print(playlist_id)
+    print(track_id)
+    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={track_id}'
+    token = request.headers['Authorization'].split()[1]
+
+    headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        "uris": [track_id],
+        'position': 0
+    }
+
+    response = requests.post(url, headers=headers)
+
+    if response.status_code != 200:
+        if response.status_code == 401:
+            message_401 = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+            try:
+                message_401 += response.reason
+            except TypeError:
+                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            app.logger.info(message_401)
+            return make_response(jsonify(response.reason), response.status_code)
+        message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
+        app.logger.info(message)
+        return make_response(jsonify(response.reason), response.status_code)
+
+    playlists = response.json()['items']
+    for playlist in playlists:
+        del playlist['external_urls']
+        del playlist['owner']
+
+    return make_response(jsonify(playlists), 200)
 
 
 @app.route("/mf/v1/me", methods=["GET"])
@@ -145,14 +190,6 @@ def code_token_exchange(code):
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
-    # if res_data.get('error') or response.status_code != 200:
-    #     print("===== response data error =====")
-    #     return make_response(jsonify(res_data, 400))
-    # else:
-    #     print("===== response success =====")
-    #     response_tokens = {'access_token': res_data['access_token'],
-    #                        'refresh_token': res_data['refresh_token']}
-    #     return make_response(jsonify(response_tokens), response.status_code)
     response_tokens = {'access_token': res_data['access_token'],
                        'refresh_token': res_data['refresh_token']}
     return make_response(jsonify(response_tokens), response.status_code)
@@ -197,7 +234,7 @@ def recommendation():
 @auth_required
 def genre_recommendation(genre):
     token = request.headers['Authorization'].split()[1]
-    request_url = 'https://api.spotify.com/v1/search?q=' + genre + '&type=track&genre=' + genre
+    request_url = f'https://api.spotify.com/v1/search?q={genre}&type=track&genre={genre}'
 
     headers = {
         'Authorization': 'Bearer ' + token,
@@ -259,7 +296,7 @@ def save_track(track_uri):
     token = request.headers['Authorization'].split()[1]
     track_uri = track_uri.split(':')[2]
     print(track_uri)
-    request_url = 'https://api.spotify.com/v1/me/tracks?ids=' + track_uri
+    request_url = f'https://api.spotify.com/v1/me/tracks?ids={track_uri}'
 
     headers = {
         'Authorization': 'Bearer ' + token,
