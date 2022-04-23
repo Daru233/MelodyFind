@@ -31,11 +31,13 @@ def auth_required(func):
         token = request.headers.get('Authorization')
 
         if not token:
+            logger.info('Request does not have authorization')
             return make_response(jsonify({'reason': 'token is missing'}), 401)
 
         token = token.split()
 
         if token[0].lower() != 'bearer':
+            logger.info('Request does not contain bearer token')
             return make_response(jsonify({'reason': 'bearer token is required'}), 401)
 
         return func(*args, **kwargs)
@@ -70,11 +72,11 @@ def get_playlists():
             try:
                 message_401 += response.reason
             except TypeError:
-                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
-            app.logger.info(message_401)
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message_401)
             return make_response(jsonify(response.reason), response.status_code)
         message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
-        app.logger.info(message)
+        logger.info(message)
         return make_response(jsonify(response.reason), response.status_code)
 
     playlists = response.json()['items']
@@ -88,8 +90,6 @@ def get_playlists():
 @app.route('/mf/v1/add_to_playlists/<string:playlist_id>/<string:track_id>', methods=['GET'])
 @auth_required
 def add_to_playlists(playlist_id, track_id):
-    print(playlist_id)
-    print(track_id)
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={track_id}'
     token = request.headers['Authorization'].split()[1]
 
@@ -146,8 +146,8 @@ def get_profile():
             try:
                 message_401 += response.reason
             except TypeError:
-                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
-            app.logger.info(message_401)
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message_401)
             return make_response(jsonify(response.reason), response.status_code)
         message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
         app.logger.info(message)
@@ -185,8 +185,8 @@ def code_token_exchange(code):
             try:
                 message += response.reason
             except TypeError:
-                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
-            app.logger.info(message)
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
@@ -217,8 +217,8 @@ def recommendation():
             try:
                 message += response.reason
             except TypeError:
-                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
-            app.logger.info(message)
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
@@ -248,8 +248,8 @@ def genre_recommendation(genre):
             try:
                 message += response.reason
             except TypeError:
-                app.logger.warning('Response reason is not of type str, cannot concat message += response.reason')
-            app.logger.info(message)
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
@@ -282,7 +282,7 @@ def start_playback(track_uri):
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
             message += response.reason
-            app.logger.info(message)
+            logger.info(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 
@@ -309,7 +309,6 @@ def save_track(track_uri):
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
             message += response.reason
-            app.logger.warning(message)
             logger.warning(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
@@ -318,4 +317,4 @@ def save_track(track_uri):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, use_reloader=True)
+    app.run(host='0.0.0.0', debug=False, use_reloader=True)
