@@ -308,8 +308,11 @@ def save_track(track_uri):
     if response.status_code != 200:
         if response.status_code == 401:
             message = 'Spotify API responded with {status_code}, '.format(status_code=str(response.status_code))
-            message += response.reason
-            logger.warning(message)
+            try:
+                message += response.reason
+            except TypeError:
+                logger.warning('Response reason is not of type str, cannot concat message += response.reason')
+            logger.info(message)
             return make_response(jsonify(response.reason), response.status_code)
         return make_response(jsonify(response.reason), response.status_code)
 

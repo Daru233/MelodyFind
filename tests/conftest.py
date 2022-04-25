@@ -35,4 +35,3 @@ def invalid_auth():
 
     yield headers
 
-# TODO make a response fixture like auth fixture
